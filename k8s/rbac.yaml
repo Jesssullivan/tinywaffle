@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: tinywaffen
+  name: tinywaffle
   labels:
-    app: tinywaffen
+    app: tinywaffle
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: tinywaffen
+  name: tinywaffle
   labels:
-    app: tinywaffen
+    app: tinywaffle
 rules:
 - apiGroups: [""]
   resources: ["endpoints", "services"]
@@ -24,14 +24,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: tinywaffen
+  name: tinywaffle
   labels:
-    app: tinywaffen
+    app: tinywaffle
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tinywaffen
+  name: tinywaffle
 subjects:
 - kind: ServiceAccount
-  name: tinywaffen
+  name: tinywaffle
   namespace: default

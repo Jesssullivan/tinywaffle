@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: tinywaffen
+  name: tinywaffle
   labels:
-    app: tinywaffen
+    app: tinywaffle
 spec:
   selector:
-    app: tinywaffen
+    app: tinywaffle
   ports:
   - name: http
     port: 80
@@ -30,13 +30,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tinywaffen-admin
+  name: tinywaffle-admin
   labels:
-    app: tinywaffen
+    app: tinywaffle
     service: admin
 spec:
   selector:
-    app: tinywaffen
+    app: tinywaffle
   ports:
   - name: admin
     port: 2019
@@ -48,13 +48,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tinywaffen-metrics
+  name: tinywaffle-metrics
   labels:
-    app: tinywaffen
+    app: tinywaffle
     service: metrics
 spec:
   selector:
-    app: tinywaffen
+    app: tinywaffle
   ports:
   - name: metrics
     port: 9090

@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tinywaffen
+  name: tinywaffle
   labels:
-    app: tinywaffen
+    app: tinywaffle
     version: v1
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: tinywaffen
+      app: tinywaffle
   template:
     metadata:
       labels:
-        app: tinywaffen
+        app: tinywaffle
         version: v1
     spec:
       containers:
-      - name: tinywaffen
-        image: tinywaffen:latest
+      - name: tinywaffle
+        image: tinywaffle:latest
         ports:
         - containerPort: 80
           name: http
@@ -32,47 +32,47 @@ spec:
         - name: DOMAIN
           valueFrom:
             configMapKeyRef:
-              name: tinywaffen-config
+              name: tinywaffle-config
               key: domain
         - name: CLOUDFLARE_API_TOKEN
           valueFrom:
             secretKeyRef:
-              name: tinywaffen-secrets
+              name: tinywaffle-secrets
               key: cloudflare-token
         - name: CROWDSEC_API_KEY
           valueFrom:
             secretKeyRef:
-              name: tinywaffen-secrets
+              name: tinywaffle-secrets
               key: crowdsec-api-key
         - name: CROWDSEC_API_URL
           valueFrom:
             configMapKeyRef:
-              name: tinywaffen-config
+              name: tinywaffle-config
               key: crowdsec-api-url
         - name: JWT_SHARED_KEY
           valueFrom:
             secretKeyRef:
-              name: tinywaffen-secrets
+              name: tinywaffle-secrets
               key: jwt-shared-key
         - name: METRICS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: tinywaffen-secrets
+              name: tinywaffle-secrets
               key: metrics-password
         - name: APP_BACKEND
           valueFrom:
             configMapKeyRef:
-              name: tinywaffen-config
+              name: tinywaffle-config
               key: app-backend
         - name: API_BACKEND
           valueFrom:
             configMapKeyRef:
-              name: tinywaffen-config
+              name: tinywaffle-config
               key: api-backend
         - name: ADMIN_BACKEND
           valueFrom:
             configMapKeyRef:
-              name: tinywaffen-config
+              name: tinywaffle-config
               key: admin-backend
         volumeMounts:
         - name: config-volume
@@ -117,18 +117,18 @@ spec:
       volumes:
       - name: config-volume
         persistentVolumeClaim:
-          claimName: tinywaffen-config-pvc
+          claimName: tinywaffle-config-pvc
       - name: data-volume
         persistentVolumeClaim:
-          claimName: tinywaffen-data-pvc
+          claimName: tinywaffle-data-pvc
       - name: logs-volume
         persistentVolumeClaim:
-          claimName: tinywaffen-logs-pvc
+          claimName: tinywaffle-logs-pvc
       - name: rules-volume
         configMap:
-          name: tinywaffen-rules
+          name: tinywaffle-rules
       - name: configs-volume
         configMap:
-          name: tinywaffen-configs
-      serviceAccountName: tinywaffen
+          name: tinywaffle-configs
+      serviceAccountName: tinywaffle
       automountServiceAccountToken: false

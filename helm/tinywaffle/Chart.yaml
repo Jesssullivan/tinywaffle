@@ -1,5 +1,5 @@
 apiVersion: v2
-name: tinywaffen
+name: tinywaffle
 description: A comprehensive Kubernetes-native WAF solution with CrowdSec and Caddy
 type: application
 version: 0.1.0
@@ -10,11 +10,11 @@ keywords:
   - caddy
   - crowdsec
   - reverse-proxy
-home: https://github.com/yourusername/tinywaffen
+home: https://github.com/yourusername/tinywaffle
 sources:
-  - https://github.com/yourusername/tinywaffen
+  - https://github.com/yourusername/tinywaffle
 maintainers:
-  - name: TinyWaffen Team
+  - name: tinywaffle Team
     email: security@example.com
 dependencies:
   - name: crowdsec

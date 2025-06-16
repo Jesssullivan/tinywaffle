@@ -1,4 +1,4 @@
-# TinyWaffen - Kubernetes-Native WAF Solution
+# tinywaffle - Kubernetes-Native WAF Solution
 
 A comprehensive, cloud-native Web Application Firewall (WAF) built on Caddy with enterprise-grade security features, designed for protecting modern applications and legacy systems in Kubernetes environments.
 
@@ -29,7 +29,7 @@ A comprehensive, cloud-native Web Application Firewall (WAF) built on Caddy with
 ```mermaid
 graph TB
     Internet([Internet]) --> Ingress[Ingress Controller]
-    Ingress --> TW[TinyWaffen WAF]
+    Ingress --> TW[tinywaffle WAF]
     TW --> App[Application Backend]
     TW --> API[API Backend]
     TW --> Admin[Admin Backend]
@@ -61,12 +61,12 @@ graph TB
 ### Installation with Helm
 
 ```bash
-# Add the TinyWaffen Helm repository
-helm repo add tinywaffen https://charts.tinyland.dev
+# Add the tinywaffle Helm repository
+helm repo add tinywaffle https://charts.tinyland.dev
 helm repo update
 
-# Install TinyWaffen
-helm install tinywaffen tinywaffen/tinywaffen \
+# Install tinywaffle
+helm install tinywaffle tinywaffle/tinywaffle \
   --set config.domain=your-domain.com \
   --set secrets.cloudflareToken=your-cloudflare-token \
   --set secrets.crowdsecApiKey=your-crowdsec-key \
@@ -151,7 +151,7 @@ backends:
 Import the included Grafana dashboard for comprehensive monitoring:
 
 ```bash
-# Dashboard ID: tinywaffen-overview
+# Dashboard ID: tinywaffle-overview
 kubectl apply -f monitoring/grafana-dashboard.yaml
 ```
 
@@ -176,7 +176,7 @@ Logs are structured in JSON format for easy parsing:
 
 ### Network Policies
 
-TinyWaffen includes network policies to restrict traffic:
+tinywaffle includes network policies to restrict traffic:
 
 - Only allows necessary ingress traffic
 - Restricts egress to required services
@@ -214,10 +214,10 @@ securityContext:
 
 ```bash
 # Build Docker image
-docker build -t tinywaffen:dev .
+docker build -t tinywaffle:dev .
 
 # Run tests
-docker run --rm tinywaffen:dev caddy validate --config /etc/caddy/Caddyfile
+docker run --rm tinywaffle:dev caddy validate --config /etc/caddy/Caddyfile
 ```
 
 ### Local Development with Hot Reload
@@ -239,11 +239,11 @@ docker-compose -f docker-compose.dev.yml up
 
 ### With TinyMachines
 
-TinyWaffen is designed to work seamlessly with TinyMachines development environments:
+tinywaffle is designed to work seamlessly with TinyMachines development environments:
 
 ```bash
 # In your tinymachine
-tinymachine create web-app --waf tinywaffen
+tinymachine create web-app --waf tinywaffle
 ```
 
 ### With Existing Applications
@@ -265,7 +265,7 @@ config:
 **WAF blocking legitimate traffic:**
 ```bash
 # Check WAF logs
-kubectl logs -l app=tinywaffen | grep blocked
+kubectl logs -l app=tinywaffle | grep blocked
 
 # Adjust rules in values.yaml
 waf:
@@ -276,13 +276,13 @@ waf:
 **CrowdSec connection issues:**
 ```bash
 # Verify CrowdSec connectivity
-kubectl exec -it deployment/tinywaffen -- curl -I http://crowdsec:8080/health
+kubectl exec -it deployment/tinywaffle -- curl -I http://crowdsec:8080/health
 ```
 
 **SSL certificate issues:**
 ```bash
 # Check certificate status
-kubectl describe certificate tinywaffen-tls
+kubectl describe certificate tinywaffle-tls
 ```
 
 ## 📄 License
@@ -291,10 +291,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🤝 Support
 
-- 📖 [Documentation](https://docs.tinywaffen.io)
-- 🐛 [Issue Tracker](https://github.com/yourusername/tinywaffen/issues)
-- 💬 [Discussions](https://github.com/yourusername/tinywaffen/discussions)
-- 📧 [Email Support](mailto:support@tinywaffen.io)
+- 📖 [Documentation](https://docs.tinywaffle.io)
+- 🐛 [Issue Tracker](https://github.com/yourusername/tinywaffle/issues)
+- 💬 [Discussions](https://github.com/yourusername/tinywaffle/discussions)
+- 📧 [Email Support](mailto:support@tinywaffle.io)
 
 ---
 

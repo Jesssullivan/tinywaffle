@@ -1,8 +1,8 @@
-# Default values for tinywaffen
+# Default values for tinywaffle
 replicaCount: 2
 
 image:
-  repository: tinywaffen
+  repository: tinywaffle
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -49,7 +49,7 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: tinywaffen-tls
+    - secretName: tinywaffle-tls
       hosts:
         - waf.example.com
 

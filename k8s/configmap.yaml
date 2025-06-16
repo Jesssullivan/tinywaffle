@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tinywaffen-config
+  name: tinywaffle-config
   labels:
-    app: tinywaffen
+    app: tinywaffle
 data:
   # Domain configuration
   domain: "example.com"
@@ -31,9 +31,9 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tinywaffen-rules
+  name: tinywaffle-rules
   labels:
-    app: tinywaffen
+    app: tinywaffle
 data:
   basic-waf.conf: |
     # Basic WAF rules
@@ -76,9 +76,9 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: tinywaffen-configs
+  name: tinywaffle-configs
   labels:
-    app: tinywaffen
+    app: tinywaffle
 data:
   base.conf: |
     (security_headers) {

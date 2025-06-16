@@ -19,7 +19,7 @@
     "helm-package": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "helm package helm/tinywaffen",
+        "command": "helm package helm/tinywaffle",
         "cwd": "{projectRoot}"
       },
       "outputs": ["{projectRoot}/*.tgz"]
