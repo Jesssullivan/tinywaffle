@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tinywaffen
+  labels:
+    app: tinywaffen
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tinywaffen
+  template:
+    metadata:
+      labels:
+        app: tinywaffen
+        version: v1
+    spec:
+      containers:
+      - name: tinywaffen
+        image: tinywaffen:latest
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        - containerPort: 2019
+          name: admin
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: tinywaffen-config
+              key: domain
+        - name: CLOUDFLARE_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: tinywaffen-secrets
+              key: cloudflare-token
+        - name: CROWDSEC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tinywaffen-secrets
+              key: crowdsec-api-key
+        - name: CROWDSEC_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tinywaffen-config
+              key: crowdsec-api-url
+        - name: JWT_SHARED_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tinywaffen-secrets
+              key: jwt-shared-key
+        - name: METRICS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tinywaffen-secrets
+              key: metrics-password
+        - name: APP_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              name: tinywaffen-config
+              key: app-backend
+        - name: API_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              name: tinywaffen-config
+              key: api-backend
+        - name: ADMIN_BACKEND
+          valueFrom:
+            configMapKeyRef:
+              name: tinywaffen-config
+              key: admin-backend
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: data-volume
+          mountPath: /data
+        - name: logs-volume
+          mountPath: /var/log/caddy
+        - name: rules-volume
+          mountPath: /etc/caddy/rules
+        - name: configs-volume
+          mountPath: /etc/caddy/configs
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 2019
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 2019
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+      volumes:
+      - name: config-volume
+        persistentVolumeClaim:
+          claimName: tinywaffen-config-pvc
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: tinywaffen-data-pvc
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: tinywaffen-logs-pvc
+      - name: rules-volume
+        configMap:
+          name: tinywaffen-rules
+      - name: configs-volume
+        configMap:
+          name: tinywaffen-configs
+      serviceAccountName: tinywaffen
+      automountServiceAccountToken: false

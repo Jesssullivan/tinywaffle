@@ -1,0 +1,148 @@
+# Default values for tinywaffen
+replicaCount: 2
+
+image:
+  repository: tinywaffen
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+    add:
+    - NET_BIND_SERVICE
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  httpsPort: 443
+  adminPort: 2019
+  metricsPort: 9090
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: waf.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: tinywaffen-tls
+      hosts:
+        - waf.example.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Persistence
+persistence:
+  enabled: true
+  storageClass: ""
+  config:
+    size: 1Gi
+  data:
+    size: 5Gi
+  logs:
+    size: 10Gi
+
+# Configuration
+config:
+  domain: "example.com"
+  environment: "production"
+  
+  # Backend services
+  backends:
+    app: "http://app:3000"
+    api: "http://api:3000"
+    admin: "http://admin:8080"
+  
+  # Rate limiting
+  rateLimit:
+    requests: 100
+    window: "60s"
+  
+  # Caching
+  cache:
+    enabled: true
+    ttl: 3600
+
+# Secrets (set these via --set or external secret management)
+secrets:
+  cloudflareToken: ""
+  crowdsecApiKey: ""
+  jwtSharedKey: ""
+  metricsPassword: ""
+
+# CrowdSec configuration
+crowdsec:
+  enabled: true
+  apiUrl: "http://crowdsec:8080"
+
+# Monitoring
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+  grafana:
+    dashboard:
+      enabled: true
+
+# Network policies
+networkPolicy:
+  enabled: true
+
+# WAF Rules
+waf:
+  rules:
+    sqlInjection: true
+    xssProtection: true
+    pathTraversal: true
+    commandInjection: true
+    fileUploadRestrictions: true
+  
+  # Custom rules can be added here
+  customRules: |
+    # Add your custom WAF rules here

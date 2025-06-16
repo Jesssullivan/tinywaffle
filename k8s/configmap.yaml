@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tinywaffen-config
+  labels:
+    app: tinywaffen
+data:
+  # Domain configuration
+  domain: "example.com"
+  
+  # CrowdSec configuration
+  crowdsec-api-url: "http://crowdsec:8080"
+  
+  # Backend services
+  app-backend: "http://app:3000"
+  api-backend: "http://api:3000"
+  admin-backend: "http://admin:8080"
+  
+  # Environment
+  environment: "production"
+  
+  # Rate limiting
+  rate-limit-requests: "100"
+  rate-limit-window: "60s"
+  
+  # Cache settings
+  cache-enabled: "true"
+  cache-ttl: "3600"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tinywaffen-rules
+  labels:
+    app: tinywaffen
+data:
+  basic-waf.conf: |
+    # Basic WAF rules
+    (sql_injection_protection) {
+        @sql_injection {
+            header_regexp User-Agent (?i)(union.*select|select.*from|insert.*into|delete.*from|update.*set|drop.*table)
+            query {
+                any (?i)(union.*select|select.*from|insert.*into|delete.*from|update.*set|drop.*table)
+            }
+            path_regexp (?i)(union.*select|select.*from|insert.*into|delete.*from|update.*set|drop.*table)
+        }
+        respond @sql_injection 403 {
+            body "Forbidden - SQL Injection attempt detected"
+        }
+    }
+    
+    (xss_protection) {
+        @xss_attempt {
+            header_regexp User-Agent (?i)(<script|javascript:|onerror=|onload=|onclick=|<iframe|<object)
+            query {
+                any (?i)(<script|javascript:|onerror=|onload=|onclick=|<iframe|<object)
+            }
+            path_regexp (?i)(<script|javascript:|onerror=|onload=|onclick=|<iframe|<object)
+        }
+        respond @xss_attempt 403 {
+            body "Forbidden - XSS attempt detected"
+        }
+    }
+    
+    (path_traversal_protection) {
+        @path_traversal {
+            path_regexp (?i)(\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e%5c)
+        }
+        respond @path_traversal 403 {
+            body "Forbidden - Path traversal attempt detected"
+        }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tinywaffen-configs
+  labels:
+    app: tinywaffen
+data:
+  base.conf: |
+    (security_headers) {
+        header {
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            X-Content-Type-Options "nosniff"
+            X-Frame-Options "DENY"
+            X-XSS-Protection "1; mode=block"
+            Referrer-Policy "strict-origin-when-cross-origin"
+            Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+            Permissions-Policy "geolocation=(), microphone=(), camera=()"
+            X-Permitted-Cross-Domain-Policies "none"
+            -Server
+            -X-Powered-By
+        }
+    }
+    
+    (rate_limits) {
+        rate_limit {
+            zone dynamic {
+                key {http.request.remote_host}
+                events 100
+                window 60s
+            }
+        }
+    }
+    
+    (logging) {
+        log {
+            output file /var/log/caddy/access.log {
+                roll_size 100mb
+                roll_keep 10
+                roll_keep_for 720h
+            }
+            format json {
+                time_format iso8601
+            }
+        }
+    }
+  
+  crowdsec.conf: |
+    (crowdsec) {
+        crowdsec {
+            api_url {env.CROWDSEC_API_URL:http://crowdsec:8080}
+            api_key {env.CROWDSEC_API_KEY}
+            ticker_interval 15s
+            enable_streaming_bouncer
+            cache_expiration 60s
+            cache_size 10000
+            default_remediation_strategy ban
+            trust_x_forwarded_for
+        }
+    }

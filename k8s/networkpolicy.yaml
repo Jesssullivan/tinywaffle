@@ -1,0 +1,68 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tinywaffen-network-policy
+  labels:
+    app: tinywaffen
+spec:
+  podSelector:
+    matchLabels:
+      app: tinywaffen
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from any source on HTTP/HTTPS ports
+  - ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
+  # Allow admin access from specific sources
+  - ports:
+    - protocol: TCP
+      port: 2019
+    from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+  # Allow metrics access from monitoring
+  - ports:
+    - protocol: TCP
+      port: 9090
+    from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+  egress:
+  # Allow DNS resolution
+  - ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow HTTPS for certificate challenges
+  - ports:
+    - protocol: TCP
+      port: 443
+  # Allow HTTP for health checks and backend communication
+  - ports:
+    - protocol: TCP
+      port: 80
+  - ports:
+    - protocol: TCP
+      port: 3000
+  - ports:
+    - protocol: TCP
+      port: 8080
+  # Allow CrowdSec API communication
+  - ports:
+    - protocol: TCP
+      port: 8080
+    to:
+    - podSelector:
+        matchLabels:
+          app: crowdsec

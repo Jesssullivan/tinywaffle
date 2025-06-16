@@ -1,0 +1,155 @@
+# Global options
+{
+    # Admin API endpoint
+    admin 0.0.0.0:2019
+    
+    # Order directives
+    order security before respond
+    order crowdsec first
+    order rate_limit before reverse_proxy
+    
+    # Enable debug logging during development
+    debug
+    
+    # Auto HTTPS
+    auto_https off
+}
+
+# Import configuration modules
+import /etc/caddy/configs/base.conf
+import /etc/caddy/configs/auth.conf
+import /etc/caddy/configs/crowdsec.conf
+import /etc/caddy/rules/basic-waf.conf
+import /etc/caddy/rules/bot-protection.conf
+
+# Import environment-specific configurations
+import /config/env/*.caddy
+
+# Metrics endpoint for monitoring
+:9090 {
+    import crowdsec_metrics
+    
+    handle /metrics {
+        metrics
+        basicauth {
+            metrics {env.METRICS_PASSWORD}
+        }
+    }
+    
+    handle /health {
+        respond "OK" 200
+    }
+}
+
+# Main application server
+{env.DOMAIN:localhost} {
+    # Apply all security measures
+    import crowdsec
+    import security_headers
+    import rate_limits
+    import logging
+    import compression
+    import cache_static
+    
+    # WAF rules
+    import sql_injection_protection
+    import xss_protection
+    import path_traversal_protection
+    import command_injection_protection
+    import file_upload_restrictions
+    import request_limits
+    
+    # Bot protection
+    import block_bad_bots
+    import user_agent_validation
+    import referrer_spam_protection
+    
+    # TLS configuration
+    tls {
+        dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    }
+    
+    # Authentication portal
+    route /auth/* {
+        import auth_portal
+    }
+    
+    # Protected routes
+    route /admin/* {
+        import auth_portal
+        authorize with mypolicy
+        
+        # Admin panel proxy
+        reverse_proxy {env.ADMIN_BACKEND:http://admin:8080} {
+            header_up X-Real-IP {http.request.remote_host}
+            header_up X-Forwarded-For {http.request.remote_host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+            
+            health_uri /health
+            health_interval 30s
+            health_timeout 5s
+        }
+    }
+    
+    # API routes with rate limiting
+    route /api/* {
+        rate_limit {
+            zone api {
+                key {http.request.remote_host}
+                events 50
+                window 60s
+            }
+        }
+        
+        reverse_proxy {env.API_BACKEND:http://api:3000} {
+            header_up X-Real-IP {http.request.remote_host}
+            header_up X-Forwarded-For {http.request.remote_host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+            
+            health_uri /health
+            health_interval 30s
+            health_timeout 5s
+        }
+    }
+    
+    # Static assets with caching
+    route /static/* {
+        import cache_static
+        file_server {
+            root /var/www/static
+        }
+    }
+    
+    # Main application
+    route {
+        reverse_proxy {env.APP_BACKEND:http://app:3000} {
+            header_up X-Real-IP {http.request.remote_host}
+            header_up X-Forwarded-For {http.request.remote_host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+            header_up X-Original-URL {http.request.uri}
+            
+            # Health check
+            health_uri /health
+            health_interval 30s
+            health_timeout 5s
+            
+            # Fail timeout
+            fail_timeout 30s
+        }
+    }
+    
+    # Health check endpoint
+    handle /health {
+        respond "WAF OK" 200 {
+            headers {
+                Content-Type "text/plain"
+                X-WAF-Status "healthy"
+            }
+        }
+    }
+}
+
+# Redirect www to non-www
+www.{env.DOMAIN:localhost} {
+    redir https://{env.DOMAIN:localhost}{uri} permanent
+}

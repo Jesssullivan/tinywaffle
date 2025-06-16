@@ -1,0 +1,27 @@
+apiVersion: v2
+name: tinywaffen
+description: A comprehensive Kubernetes-native WAF solution with CrowdSec and Caddy
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - waf
+  - security
+  - caddy
+  - crowdsec
+  - reverse-proxy
+home: https://github.com/yourusername/tinywaffen
+sources:
+  - https://github.com/yourusername/tinywaffen
+maintainers:
+  - name: TinyWaffen Team
+    email: security@example.com
+dependencies:
+  - name: crowdsec
+    version: "^0.9.0"
+    repository: https://crowdsecurity.github.io/helm-charts
+    condition: crowdsec.enabled
+  - name: prometheus
+    version: "^15.0.0"
+    repository: https://prometheus-community.github.io/helm-charts
+    condition: monitoring.prometheus.enabled
